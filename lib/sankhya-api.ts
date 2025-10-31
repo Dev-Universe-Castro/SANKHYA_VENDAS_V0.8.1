@@ -58,6 +58,18 @@ async function obterToken(retryCount = 0): Promise<string> {
     return tokenPromise;
   }
 
+  // === NOVO PASSO: TENTAR BUSCAR NO CACHE COMPARTILHADO (REDIS) ===
+  const cachedRedisToken = await redisCacheService.get<string>('sankhya:token');
+
+  if (cachedRedisToken) {
+    // Se o token for encontrado no Redis, armazenar no cache local
+    // para as próximas requisições do mesmo processo e retornar.
+    cachedToken = cachedRedisToken;
+    console.log("✅ Token obtido do Redis e armazenado em cache local");
+    return cachedRedisToken;
+  }
+  // =================================================================
+
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 1000;
 
